@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
             status: 'SUCCESS'
           }
         })
-        const totalPaid = allSuccessPayments.reduce((sum, p) => sum + p.amount, 0)
+        const totalPaid = allSuccessPayments.reduce((sum: number, p: any) => sum + p.amount, 0)
         const isComplete = totalPaid >= booking.totalAmount
 
         // Upsert tontine
