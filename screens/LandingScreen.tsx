@@ -217,7 +217,7 @@ export function LandingScreen() {
             {[
               { icon: Calendar, label: "Date", value: "23 Mai 2026", color: "purple" },
               { icon: Clock, label: "Heure", value: "13h00 - 22h00", color: "blue" },
-              { icon: MapPin, label: "Lieu", value: "A confirmé", color: "pink" },
+              { icon: MapPin, label: "Lieu", value: "CALAVI-ZOPAH", color: "pink" },
             ].map(({ icon: Icon, label, value, color }) => (
               <div
                 key={label}

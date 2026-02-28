@@ -260,7 +260,7 @@ export function TicketScreen() {
                   <div className="flex items-center gap-2">
                     <MapPin size={14} className="text-purple-400 flex-shrink-0" />
                     <span className="text-[10px] font-bold text-white/50 uppercase tracking-tighter italic">
-                      Lieu à confirmer
+                      CALAVI-ZOPAH
                     </span>
                   </div>
                 </div>
