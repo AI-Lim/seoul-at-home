@@ -320,32 +320,21 @@ export function TicketScreen() {
         </motion.div>
 
         {/* Actions */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+       
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleDownload}
+            onClick={handleShare}
             disabled={downloading || !qrReady}
-            className="flex items-center justify-center gap-3 bg-white text-black py-4 rounded-2xl font-black text-sm uppercase italic transition-all hover:bg-cyan-400 disabled:opacity-50"
+            className="flex items-center justify-center gap-3 bg-white/10 border border-white/20 text-white py-4 rounded-2xl font-black text-sm uppercase italic backdrop-blur-xl disabled:opacity-50"
           >
-            {downloading
+           {downloading
               ? <span className="text-xs">Génération...</span>
               : !qrReady
               ? <span className="text-xs">Chargement...</span>
               : <><Download size={20} /> Télécharger</>
             }
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleShare}
-            disabled={!qrReady}
-            className="flex items-center justify-center gap-3 bg-white/10 border border-white/20 text-white py-4 rounded-2xl font-black text-sm uppercase italic backdrop-blur-xl disabled:opacity-50"
-          >
-            <Share2 size={20} /> Partager
-          </motion.button>
-        </div>
+        
 
         <p className="text-center text-white/30 text-[10px] font-bold uppercase tracking-widest leading-relaxed px-10">
           Un récapitulatif a été envoyé sur{' '}
