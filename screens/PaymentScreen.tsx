@@ -86,35 +86,42 @@ export function PaymentScreen() {
 useEffect(() => {
   if (step !== 'waiting') return;
 
+  // Stocker le timestamp du moment où on commence à attendre
+  const waitingSince = Date.now();
+
   const interval = setInterval(async () => {
     try {
       const res = await fetch(`/api/payment/status?bookingId=${booking.bookingId}`);
       const data = await res.json();
+
+      // Ne pas réagir avant 10 secondes minimum
+      if (Date.now() - waitingSince < 10000) return;
 
       if (data.status === 'PAID') {
         clearInterval(interval);
         updateBooking({ ticketId: data.ticketCode });
         router.push('/ticket');
 
-      } else if (data.status === 'TONTINE') {
-  clearInterval(interval);
-  updateBooking({
-    tontinePaid: data.totalPaid,
-    remainingAmount: data.remaining,
-    amountToPayNow: 0,
-    isTontine: true,
-  });
-  router.push('/tontine');
-} else if (data.status === 'FAILED') {
+      } else if (data.status === 'TONTINE' && !data.hasPendingPayment) {
+        // Tontine validée ET plus de paiement en attente → versement confirmé
+        clearInterval(interval);
+        updateBooking({
+          tontinePaid: data.totalPaid,
+          remainingAmount: data.remaining,
+          amountToPayNow: 0,
+          isTontine: true,
+        });
+        router.push('/tontine');
+
+      } else if (data.status === 'FAILED') {
         clearInterval(interval);
         setStep('rejected');
       }
 
-      setPollCount(prev => prev + 1);
     } catch (e) {
       console.error('Polling error:', e);
     }
-  }, 8000);
+  }, 10000);
 
   return () => clearInterval(interval);
 }, [step]);
