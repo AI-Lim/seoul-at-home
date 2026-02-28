@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-
+export const dynamic = 'force-dynamic'
 async function generateTicket(bookingId: string) {
   const ticketCode = `SAH-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
   const booking = await prisma.booking.findUnique({

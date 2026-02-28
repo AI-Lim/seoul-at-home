@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-
+export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
             user: true,
             koreanIdentity: true,
             tontine: true,
-            payment: true,
+            payments: true,
           }
         }
       }
