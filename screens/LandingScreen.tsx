@@ -216,7 +216,7 @@ export function LandingScreen() {
           <div className="grid grid-cols-1 gap-3">
             {[
               { icon: Calendar, label: "Date", value: "23 Mai 2026", color: "purple" },
-              { icon: Clock, label: "Heure", value: "13h00 - 22h00", color: "blue" },
+              { icon: Clock, label: "Heure", value: "13h00 - 23h00", color: "blue" },
               { icon: MapPin, label: "Lieu", value: "CALAVI-ZOPAH", color: "pink" },
             ].map(({ icon: Icon, label, value, color }) => (
               <div

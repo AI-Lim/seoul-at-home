@@ -254,7 +254,7 @@ export function TicketScreen() {
                   <div className="flex items-center gap-2">
                     <Clock size={14} className="text-pink-400 flex-shrink-0" />
                     <span className="text-[10px] font-bold text-white/50 uppercase tracking-tighter">
-                      13:00 - 22:00
+                      13:00 - 23:00
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
