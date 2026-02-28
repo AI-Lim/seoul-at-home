@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -26,12 +27,6 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.13.1"
   },
-  "scripts": {
-  "postinstall": "prisma generate",
-  "dev": "next dev",
-  "build": "prisma generate && next build",
-  "start": "next start"
-},
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
