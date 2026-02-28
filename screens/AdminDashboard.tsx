@@ -68,19 +68,22 @@ export function AdminDashboard() {
     } catch (e) { console.error(e); }
   };
 
-  const fetchConfig = async () => {
-    try {
-      const res = await fetch('/api/admin/config');
-      const data = await res.json();
-      if (data.success) {
-        setAvailability(data.availability);
+  const fetchConfig = async (forceUpdate = false) => {
+  try {
+    const res = await fetch('/api/admin/config');
+    const data = await res.json();
+    if (data.success) {
+      setAvailability(data.availability);
+      // Met à jour editConfig seulement si panel fermé ou forceUpdate
+      if (!showConfigPanel || forceUpdate) {
         setEditConfig({
           seoulEntryTotal: data.config.seoulEntryTotal,
           neonVibeTotal: data.config.neonVibeTotal,
         });
       }
-    } catch (e) { console.error(e); }
-  };
+    }
+  } catch (e) { console.error(e); }
+};
 
   const fetchPending = async () => {
     try {
@@ -125,7 +128,7 @@ export function AdminDashboard() {
       });
       const data = await res.json();
       if (data.success) {
-        await fetchConfig();
+        await fetchConfig(true);
         setSaveSuccess(true);
         setTimeout(() => { setSaveSuccess(false); setShowConfigPanel(false); }, 1500);
       }
