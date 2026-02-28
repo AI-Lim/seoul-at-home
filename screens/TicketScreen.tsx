@@ -333,8 +333,9 @@ export function TicketScreen() {
               : !qrReady
               ? <span className="text-xs">Chargement...</span>
               : <><Download size={20} /> Télécharger</>
-            }
-        
+            
+        }
+</motion.button>
 
         <p className="text-center text-white/30 text-[10px] font-bold uppercase tracking-widest leading-relaxed px-10">
           Un récapitulatif a été envoyé sur{' '}
