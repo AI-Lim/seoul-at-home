@@ -326,7 +326,18 @@ export function TicketScreen() {
             whileTap={{ scale: 0.95 }}
             onClick={handleShare}
             disabled={downloading || !qrReady}
-            className="flex items-center justify-center gap-3 bg-white/10 border border-white/20 text-white py-4 rounded-2xl font-black text-sm uppercase italic backdrop-blur-xl disabled:opacity-50"
+           className="
+w-full
+flex items-center justify-center gap-3
+py-4 px-6
+bg-white/10 border border-white/20
+text-white
+rounded-2xl
+font-black text-sm uppercase italic
+backdrop-blur-xl
+disabled:opacity-50
+mx-auto
+"
           >
            {downloading
               ? <span className="text-xs">Génération...</span>
