@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Users, Ticket, TrendingUp, DollarSign, QrCode, 
-  Calendar, ArrowLeft, Activity, Search, 
-  Settings, Save, RefreshCw, Bell, CheckCircle, XCircle, Clock, Trash2
+  ArrowLeft, Activity, Search, 
+  Settings, Save, RefreshCw, CheckCircle, XCircle, Trash2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { GalaxyBackground } from "../components/ui/GalaxyBackground";
@@ -49,9 +49,8 @@ export function AdminDashboard() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetting, setResetting] = useState(false);
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchAll();
-    // Poll paiements en attente toutes les 15 secondes
     const interval = setInterval(fetchPending, 15000);
     return () => clearInterval(interval);
   }, []);
@@ -69,21 +68,20 @@ export function AdminDashboard() {
   };
 
   const fetchConfig = async (forceUpdate = false) => {
-  try {
-    const res = await fetch('/api/admin/config');
-    const data = await res.json();
-    if (data.success) {
-      setAvailability(data.availability);
-      // Met à jour editConfig seulement si panel fermé ou forceUpdate
-      if (!showConfigPanel || forceUpdate) {
-        setEditConfig({
-          seoulEntryTotal: data.config.seoulEntryTotal,
-          neonVibeTotal: data.config.neonVibeTotal,
-        });
+    try {
+      const res = await fetch('/api/admin/config');
+      const data = await res.json();
+      if (data.success) {
+        setAvailability(data.availability);
+        if (!showConfigPanel || forceUpdate) {
+          setEditConfig({
+            seoulEntryTotal: data.config.seoulEntryTotal,
+            neonVibeTotal: data.config.neonVibeTotal,
+          });
+        }
       }
-    }
-  } catch (e) { console.error(e); }
-};
+    } catch (e) { console.error(e); }
+  };
 
   const fetchPending = async () => {
     try {
@@ -102,8 +100,8 @@ export function AdminDashboard() {
       const res = await fetch('/api/payment/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          paymentId, 
+        body: JSON.stringify({
+          paymentId,
           action,
           adminNote: action === 'reject' ? rejectNote : undefined
         })
@@ -162,16 +160,16 @@ export function AdminDashboard() {
       {/* HEADER */}
       <div className="relative z-10 px-5 pt-12 pb-4 max-w-md mx-auto">
         <div className="flex items-center justify-between mb-1">
-         <button onClick={() => router.push('/')} className="flex items-center gap-2 text-white/30 hover:text-white transition-colors">
-  <ArrowLeft size={16} />
-  <span className="text-[9px] font-black uppercase tracking-[0.3em]">Accueil</span>
-</button>
-<button 
-  onClick={() => { sessionStorage.removeItem('admin_auth'); router.push('/admin-login'); }}
-  className="text-[9px] font-black text-red-400/50 uppercase tracking-widest hover:text-red-400 transition-colors"
->
-  Déconnexion
-</button>
+          <button onClick={() => router.push('/')} className="flex items-center gap-2 text-white/30 hover:text-white transition-colors">
+            <ArrowLeft size={16} />
+            <span className="text-[9px] font-black uppercase tracking-[0.3em]">Accueil</span>
+          </button>
+          <button
+            onClick={() => { sessionStorage.removeItem('admin_auth'); router.push('/admin-login'); }}
+            className="text-[9px] font-black text-red-400/50 uppercase tracking-widest hover:text-red-400 transition-colors"
+          >
+            Déconnexion
+          </button>
           <div className="flex items-center gap-2">
             <motion.button whileTap={{ scale: 0.9 }} onClick={fetchAll}
               className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
@@ -204,7 +202,7 @@ export function AdminDashboard() {
               { val: timeLeft.seconds, l: 's' },
             ].map((u, i) => (
               <div key={i} className="flex items-baseline gap-0.5">
-                <span className="text-white font-black text-sm tabular-nums">{String(u.val).padStart(2,'0')}</span>
+                <span className="text-white font-black text-sm tabular-nums">{String(u.val).padStart(2, '0')}</span>
                 <span className="text-white/30 text-[9px] font-bold">{u.l}</span>
                 {i < 3 && <span className="text-white/20 text-xs mx-0.5">:</span>}
               </div>
@@ -285,8 +283,6 @@ export function AdminDashboard() {
                   <Save size={14} />
                   {saving ? 'Sauvegarde...' : saveSuccess ? '✓ Sauvegardé !' : 'Sauvegarder'}
                 </motion.button>
-
-                {/* Reset BDD */}
                 <button
                   onClick={() => setShowResetConfirm(true)}
                   className="w-full mt-3 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400"
@@ -319,17 +315,12 @@ export function AdminDashboard() {
                   Toutes les données (users, bookings, tickets, paiements) seront supprimées. La config des places sera conservée.
                 </p>
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowResetConfirm(false)}
-                    className="flex-1 py-3 rounded-2xl bg-white/10 text-white font-black text-sm uppercase"
-                  >
+                  <button onClick={() => setShowResetConfirm(false)}
+                    className="flex-1 py-3 rounded-2xl bg-white/10 text-white font-black text-sm uppercase">
                     Annuler
                   </button>
-                  <button
-                    onClick={handleReset}
-                    disabled={resetting}
-                    className="flex-1 py-3 rounded-2xl bg-red-500 text-white font-black text-sm uppercase"
-                  >
+                  <button onClick={handleReset} disabled={resetting}
+                    className="flex-1 py-3 rounded-2xl bg-red-500 text-white font-black text-sm uppercase">
                     {resetting ? '...' : 'Confirmer'}
                   </button>
                 </div>
@@ -341,12 +332,11 @@ export function AdminDashboard() {
         {/* ── TAB OVERVIEW ── */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            {/* Stats cards */}
             <div className="grid grid-cols-2 gap-3">
               {[
                 { label: 'Tickets', value: stats?.stats?.totalTickets ?? '—', icon: Ticket, color: 'from-purple-500 to-pink-500' },
                 { label: 'Participants', value: stats?.stats?.totalUsers ?? '—', icon: Users, color: 'from-blue-500 to-cyan-500' },
-                { label: 'Revenus', value: stats?.stats?.totalRevenue ? `${(stats.stats.totalRevenue/1000).toFixed(0)}K F` : '—', icon: DollarSign, color: 'from-green-500 to-emerald-500' },
+                { label: 'Revenus', value: stats?.stats?.totalRevenue ? `${(stats.stats.totalRevenue / 1000).toFixed(0)}K F` : '—', icon: DollarSign, color: 'from-green-500 to-emerald-500' },
                 { label: 'Tontines', value: stats?.stats?.tontineBookings ?? '—', icon: TrendingUp, color: 'from-orange-500 to-yellow-500' },
               ].map((s, i) => {
                 const Icon = s.icon;
@@ -363,7 +353,6 @@ export function AdminDashboard() {
               })}
             </div>
 
-            {/* Disponibilité */}
             {availability && (
               <div className="bg-white/5 border border-white/10 rounded-3xl p-5">
                 <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-4">Disponibilité</p>
@@ -389,7 +378,6 @@ export function AdminDashboard() {
               </div>
             )}
 
-            {/* Tontine pulse */}
             <div className="bg-gradient-to-br from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-3xl p-5">
               <p className="text-orange-400 font-black text-[10px] uppercase tracking-widest mb-4 flex items-center gap-2">
                 <TrendingUp size={12} /> Pulse Tontine
@@ -398,7 +386,7 @@ export function AdminDashboard() {
                 {[
                   { label: 'En cours', val: stats?.stats?.tontineBookings ?? '—' },
                   { label: 'Complétés', val: stats?.stats?.paidBookings ?? '—' },
-                  { label: 'Revenus', val: stats?.stats?.totalRevenue ? `${(stats.stats.totalRevenue/1000).toFixed(0)}K` : '—' },
+                  { label: 'Revenus', val: stats?.stats?.totalRevenue ? `${(stats.stats.totalRevenue / 1000).toFixed(0)}K` : '—' },
                 ].map((item, i) => (
                   <div key={i} className="bg-white/5 rounded-2xl p-3 text-center">
                     <p className="text-white font-black text-xl italic">{item.val}</p>
@@ -426,13 +414,8 @@ export function AdminDashboard() {
                 const isTontine = booking?.status === 'TONTINE' || tontine;
 
                 return (
-                  <motion.div
-                    key={payment.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4"
-                  >
-                    {/* Header participant */}
+                  <motion.div key={payment.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                    className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-xl font-bold text-white">
                         {identity?.hangul?.charAt(0) || '?'}
@@ -448,7 +431,6 @@ export function AdminDashboard() {
                       )}
                     </div>
 
-                    {/* Détails paiement */}
                     <div className="bg-white/5 rounded-2xl p-4 space-y-2">
                       <div className="flex justify-between">
                         <span className="text-white/40 text-[10px] uppercase font-black">Montant</span>
@@ -480,50 +462,34 @@ export function AdminDashboard() {
                       </div>
                     </div>
 
-                    {/* Boutons action */}
                     {showRejectInput === payment.id ? (
                       <div className="space-y-2">
-                        <input
-                          type="text"
-                          value={rejectNote}
-                          onChange={(e) => setRejectNote(e.target.value)}
+                        <input type="text" value={rejectNote} onChange={(e) => setRejectNote(e.target.value)}
                           placeholder="Raison du rejet (optionnel)"
-                          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm outline-none"
-                        />
+                          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm outline-none" />
                         <div className="flex gap-2">
-                          <button
-                            onClick={() => setShowRejectInput(null)}
-                            className="flex-1 py-3 rounded-2xl bg-white/10 text-white font-black text-xs uppercase"
-                          >
+                          <button onClick={() => setShowRejectInput(null)}
+                            className="flex-1 py-3 rounded-2xl bg-white/10 text-white font-black text-xs uppercase">
                             Annuler
                           </button>
-                          <button
-                            onClick={() => handlePaymentAction(payment.id, 'reject')}
-                            disabled={processing === payment.id}
-                            className="flex-1 py-3 rounded-2xl bg-red-500 text-white font-black text-xs uppercase"
-                          >
+                          <button onClick={() => handlePaymentAction(payment.id, 'reject')} disabled={processing === payment.id}
+                            className="flex-1 py-3 rounded-2xl bg-red-500 text-white font-black text-xs uppercase">
                             {processing === payment.id ? '...' : 'Confirmer rejet'}
                           </button>
                         </div>
                       </div>
                     ) : (
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => setShowRejectInput(payment.id)}
-                          className="flex-1 py-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-black text-xs uppercase flex items-center justify-center gap-2"
-                        >
+                        <button onClick={() => setShowRejectInput(payment.id)}
+                          className="flex-1 py-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-black text-xs uppercase flex items-center justify-center gap-2">
                           <XCircle size={14} /> Rejeter
                         </button>
-                        <button
-                          onClick={() => handlePaymentAction(payment.id, 'approve')}
-                          disabled={processing === payment.id}
-                          className="flex-1 py-3 rounded-2xl bg-green-500 text-white font-black text-xs uppercase flex items-center justify-center gap-2"
-                        >
-                          {processing === payment.id ? (
-                            <RefreshCw size={14} className="animate-spin" />
-                          ) : (
-                            <><CheckCircle size={14} /> Valider</>
-                          )}
+                        <button onClick={() => handlePaymentAction(payment.id, 'approve')} disabled={processing === payment.id}
+                          className="flex-1 py-3 rounded-2xl bg-green-500 text-white font-black text-xs uppercase flex items-center justify-center gap-2">
+                          {processing === payment.id
+                            ? <RefreshCw size={14} className="animate-spin" />
+                            : <><CheckCircle size={14} /> Valider</>
+                          }
                         </button>
                       </div>
                     )}
@@ -536,98 +502,147 @@ export function AdminDashboard() {
 
         {/* ── TAB TICKETS ── */}
         {activeTab === 'tickets' && (
-  <div className="space-y-4">
-    
-    {/* Tontines en cours */}
-    {stats?.tontineInProgress?.length > 0 && (
-      <div>
-        <p className="text-orange-400 text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2">
-          <TrendingUp size={12} /> Tontines en cours ({stats.tontineInProgress.length})
-        </p>
-        <div className="space-y-3 mb-6">
-          {stats.tontineInProgress.map((b: any) => {
-            const totalPaid = b.payments.reduce((sum: number, p: any) => sum + p.amount, 0)
-            const percent = Math.round((totalPaid / b.totalAmount) * 100)
-            return (
-              <div key={b.id} className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-2xl bg-orange-500/20 flex items-center justify-center text-lg font-bold text-white">
-                    {b.koreanIdentity?.hangul?.charAt(0) || '?'}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-white font-black text-xs italic uppercase">{b.koreanIdentity?.koreanName || 'Inconnu'}</p>
-                    <p className="text-white/40 text-[9px]">{b.user?.name} • {b.user?.phone}</p>
-                  </div>
-                  <span className="bg-orange-500/20 text-orange-400 text-[9px] font-black uppercase px-2 py-1 rounded-xl">
-                    En cours
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[9px] font-black uppercase">
-                    <span className="text-white/40">Payé</span>
-                    <span className="text-orange-400">{totalPaid.toLocaleString()} / {b.totalAmount.toLocaleString()} F</span>
-                  </div>
-                  <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-orange-500 to-yellow-500 transition-all"
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[9px]">
-                    <span className="text-white/20">{percent}% complété</span>
-                    <span className="text-white/40">Reste {(b.totalAmount - totalPaid).toLocaleString()} F</span>
-                  </div>
-                </div>
-                <p className="text-white/20 text-[9px] mt-2 uppercase font-black">
-                  {b.selectedPass?.replace('-', ' ')}
-                </p>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    )}
+          <div className="space-y-4">
 
-    {/* Tickets vendus */}
-    <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
-      <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
-        <p className="text-white font-black text-sm italic uppercase">Tickets Générés</p>
-        <button onClick={fetchStats}><RefreshCw size={14} className="text-white/30" /></button>
-      </div>
-      <div className="px-5 py-3 border-b border-white/5">
-        <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2">
-          <Search size={12} className="text-white/30" />
-          <input type="text" placeholder="Rechercher..." value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-xs text-white outline-none flex-1 placeholder:text-white/20" />
-        </div>
-      </div>
-      <div className="divide-y divide-white/5">
-        {filteredTickets.length === 0 ? (
-          <div className="py-10 text-center text-white/20 text-xs italic">Aucun ticket généré pour l'instant</div>
-        ) : (
-          filteredTickets.map((ticket: any, i: number) => (
-            <motion.div key={ticket.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }}
-              className="px-5 py-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-black text-sm">{ticket.booking?.koreanIdentity?.hangul?.charAt(0) || '?'}</span>
+            {/* Tontines en cours */}
+            {stats?.tontineInProgress?.length > 0 && (
+              <div>
+                <p className="text-orange-400 text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <TrendingUp size={12} /> Tontines en cours ({stats.tontineInProgress.length})
+                </p>
+                <div className="space-y-3 mb-6">
+                  {stats.tontineInProgress.map((b: any) => {
+                    // ✅ Source unique : tontine.amountPaid mis à jour par confirm
+                    const amountPaid = b.tontine?.amountPaid || 0;
+                    const total = b.totalAmount || b.passPrice || 0;
+                    const percent = total > 0 ? Math.min(100, Math.round((amountPaid / total) * 100)) : 0;
+                    const remaining = Math.max(0, total - amountPaid);
+                    const paidBoxes = b.tontine?.paidBoxes || 0;
+                    const totalBoxes = Math.floor(total / 1000);
+
+                    return (
+                      <div key={b.id} className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-4">
+                        {/* Header */}
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-2xl bg-orange-500/20 flex items-center justify-center text-lg font-bold text-white flex-shrink-0">
+                            {b.koreanIdentity?.hangul?.charAt(0) || '?'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-black text-xs italic uppercase truncate">
+                              {b.koreanIdentity?.koreanName || 'Inconnu'}
+                            </p>
+                            <p className="text-white/40 text-[9px] truncate">
+                              {b.user?.name} • {b.user?.phone}
+                            </p>
+                          </div>
+                          <span className="bg-orange-500/20 text-orange-400 text-[9px] font-black uppercase px-2 py-1 rounded-xl flex-shrink-0">
+                            {percent}%
+                          </span>
+                        </div>
+
+                        {/* Barre de progression */}
+                        <div className="space-y-1 mb-3">
+                          <div className="flex justify-between text-[9px] font-black uppercase">
+                            <span className="text-white/40">Versé</span>
+                            <span className="text-orange-400">
+                              {amountPaid.toLocaleString()} / {total.toLocaleString()} F
+                            </span>
+                          </div>
+                          <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${percent}%` }}
+                              transition={{ duration: 0.8 }}
+                              className="h-full bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full"
+                            />
+                          </div>
+                          <div className="flex justify-between text-[9px]">
+                            <span className="text-white/30">🪙 {paidBoxes} / {totalBoxes} boxes</span>
+                            <span className="text-white/40">Reste {remaining.toLocaleString()} F</span>
+                          </div>
+                        </div>
+
+                        {/* Historique versements */}
+                        {b.payments?.length > 0 && (
+                          <div className="bg-white/5 rounded-2xl p-3 space-y-1.5">
+                            <p className="text-white/30 text-[8px] font-black uppercase tracking-widest mb-2">
+                              Historique versements
+                            </p>
+                            {b.payments.map((p: any, i: number) => (
+                              <div key={p.id} className="flex justify-between items-center">
+                                <span className="text-white/40 text-[9px]">
+                                  Versement {i + 1} — {p.operator?.toUpperCase()}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-green-400 text-[9px] font-black">
+                                    +{p.amount.toLocaleString()} F
+                                  </span>
+                                  <span className="text-white/20 text-[8px]">
+                                    {new Date(p.paidAt || p.createdAt).toLocaleDateString('fr-FR')}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <p className="text-white/20 text-[9px] mt-2 uppercase font-black">
+                          {b.selectedPass?.replace('-', ' ')}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-black text-xs italic uppercase truncate">{ticket.booking?.koreanIdentity?.koreanName || 'Inconnu'}</p>
-                <p className="text-white/20 text-[9px] font-mono truncate">{ticket.ticketCode}</p>
+            )}
+
+            {/* Tickets générés */}
+            <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+                <p className="text-white font-black text-sm italic uppercase">Tickets Générés</p>
+                <button onClick={fetchStats}><RefreshCw size={14} className="text-white/30" /></button>
               </div>
-              <div className="text-right flex-shrink-0">
-                <p className="text-[9px] font-black uppercase mb-0.5 text-cyan-400">✓ Payé</p>
-                <p className="text-white font-black text-xs italic">{ticket.booking?.passPrice?.toLocaleString()} F</p>
+              <div className="px-5 py-3 border-b border-white/5">
+                <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2">
+                  <Search size={12} className="text-white/30" />
+                  <input type="text" placeholder="Rechercher..." value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-transparent text-xs text-white outline-none flex-1 placeholder:text-white/20" />
+                </div>
               </div>
-            </motion.div>
-          ))
+              <div className="divide-y divide-white/5">
+                {filteredTickets.length === 0 ? (
+                  <div className="py-10 text-center text-white/20 text-xs italic">
+                    Aucun ticket généré pour l'instant
+                  </div>
+                ) : (
+                  filteredTickets.map((ticket: any, i: number) => (
+                    <motion.div key={ticket.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }}
+                      className="px-5 py-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-black text-sm">
+                          {ticket.booking?.koreanIdentity?.hangul?.charAt(0) || '?'}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-black text-xs italic uppercase truncate">
+                          {ticket.booking?.koreanIdentity?.koreanName || 'Inconnu'}
+                        </p>
+                        <p className="text-white/20 text-[9px] font-mono truncate">{ticket.ticketCode}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-[9px] font-black uppercase mb-0.5 text-cyan-400">✓ Payé</p>
+                        <p className="text-white font-black text-xs italic">
+                          {ticket.booking?.passPrice?.toLocaleString()} F
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
         )}
-      </div>
-    </div>
-  </div>
-)}
-        
 
       </div>
     </div>
