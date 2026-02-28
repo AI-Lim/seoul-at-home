@@ -248,7 +248,7 @@ export function TicketScreen() {
                   <div className="flex items-center gap-2">
                     <Calendar size={14} className="text-cyan-400 flex-shrink-0" />
                     <span className="text-[10px] font-bold text-white/50 uppercase tracking-tighter">
-                      23 Mai 2026
+                      Samedi 23 Mai 2026
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
