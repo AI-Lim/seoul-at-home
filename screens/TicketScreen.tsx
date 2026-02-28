@@ -192,7 +192,7 @@ export function TicketScreen() {
                   <div className="flex items-center gap-2 mb-1">
                     <Sparkles className="text-cyan-400" size={16} />
                     <span className="text-[10px] font-black text-white/60 uppercase tracking-[0.4em]">
-                      Seoul At Home
+                      K-VIBE : Seoul At Home
                     </span>
                   </div>
                   <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">
