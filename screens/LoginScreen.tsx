@@ -16,83 +16,74 @@ export function LoginScreen() {
   const isValid = email.length > 0;
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
 
-      const data = await response.json();
-      if (!data.success) throw new Error(data.error);
+    const data = await response.json();
+    if (!data.success) throw new Error(data.error);
 
-      const booking = data.booking;
+    const booking = data.booking;
 
-      // Mettre à jour le contexte avec toutes les infos
-      updateBooking({
-        userId: data.user.id,
-        userName: data.user.name,
-        userEmail: data.user.email,
-        userPhone: data.user.phone,
-        bookingId: booking?.id || '',
-        selectedPass: booking?.selectedPass || null,
-        passPrice: booking?.passPrice || 0,
-        passName: booking?.selectedPass || '',
-        totalAmount: booking?.totalAmount || 0,
-        koreanIdentity: booking?.koreanIdentity || null,
-        tontinePaid: booking?.tontine?.amountPaid || data.totalPaid || 0,
-        remainingAmount: booking?.tontine?.remainingAmount || 0,
-        isTontine: booking?.status === 'TONTINE',
-        isPaid: booking?.status === 'PAID',
-        ticketId: data.ticketCode || booking?.ticket?.ticketCode || '',
-        amountToPayNow: 0,
-      });
+    updateBooking({
+      userId: data.user.id,
+      userName: data.user.name,
+      userEmail: data.user.email,
+      userPhone: data.user.phone,
+      bookingId: booking?.id || '',
+      selectedPass: booking?.selectedPass || null,
+      passPrice: booking?.passPrice || 0,
+      passName: booking?.selectedPass || '',
+      totalAmount: booking?.totalAmount || 0,
+      koreanIdentity: booking?.koreanIdentity || null,
+      tontinePaid: booking?.tontine?.amountPaid || data.totalPaid || 0,
+      remainingAmount: booking?.tontine?.remainingAmount || 0,
+      isTontine: booking?.status === 'TONTINE',
+      isPaid: booking?.status === 'PAID',
+      ticketId: data.ticketCode || booking?.ticket?.ticketCode || '',
+      amountToPayNow: 0,
+    });
 
-      // Redirection intelligente selon l'état
-      switch (data.state) {
-        case 'paid':
-          router.push('/ticket');
-          break;
-
-        case 'tontine_pending':
-          // Paiement tontine en attente de validation admin
-          router.push('/payment-waiting');
-          break;
-
-        case 'tontine_in_progress':
-          // Tontine en cours, pas de paiement en attente
-          router.push('/tontine');
-          break;
-
-        case 'payment_pending':
-          // Paiement direct en attente de validation admin
-          router.push('/payment-waiting');
-          break;
-
-        case 'payment_rejected':
-          // Paiement rejeté → retour au paiement avec message
-          updateBooking({ isPaid: false });
-          setError(`Paiement rejeté${data.rejectedNote ? ` : ${data.rejectedNote}` : ''}. Veuillez réessayer.`);
-          break;
-
-        case 'no_booking':
-          router.push('/pass-selection');
-          break;
-
-        default:
-          router.push('/pass-selection');
-      }
-
-    } catch (error: any) {
-      setError(error.message || 'Utilisateur non trouvé');
-    } finally {
-      setLoading(false);
+    switch (data.state) {
+      case 'paid':
+        router.push('/ticket');
+        break;
+      case 'tontine_pending':
+        router.push('/payment-waiting');
+        break;
+      case 'tontine_in_progress':
+        router.push('/tontine');
+        break;
+      case 'tontine_rejected':
+        setError(`Dernier paiement rejeté${data.rejectedNote ? ` : ${data.rejectedNote}` : ''}. Tes versements précédents sont conservés.`);
+        break;
+      case 'payment_pending':
+        router.push('/payment-waiting');
+        break;
+      case 'payment_rejected':
+        updateBooking({ isPaid: false });
+        setError(`Paiement rejeté${data.rejectedNote ? ` : ${data.rejectedNote}` : ''}. Veuillez réessayer.`);
+        break;
+      case 'no_booking':
+        router.push('/pass-selection');
+        break;
+      default:
+        router.push('/pass-selection');
     }
-  };
+
+  } catch (error: any) {
+    setError(error.message || 'Utilisateur non trouvé');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-hidden bg-[#000007]">

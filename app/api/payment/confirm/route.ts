@@ -119,22 +119,25 @@ export async function POST(req: NextRequest) {
         })
       }
 
-    } else if (action === 'reject') {
-      await prisma.payment.update({
-        where: { id: paymentId },
-        data: { status: 'FAILED', adminNote: adminNote || 'Paiement rejeté' }
-      })
-      await prisma.booking.update({
-        where: { id: payment.bookingId },
-        data: { status: 'PENDING' }
-      })
-      return NextResponse.json({ success: true, message: 'Paiement rejeté.' })
-    }
+    }  else if (action === 'reject') {
+  await prisma.payment.update({
+    where: { id: paymentId },
+    data: { status: 'FAILED', adminNote: adminNote || 'Paiement rejeté' }
+  })
 
-    return NextResponse.json({ error: 'Action invalide' }, { status: 400 })
+  // Garder le statut TONTINE si c'était une tontine, sinon PENDING
+  const currentBooking = await prisma.booking.findUnique({
+    where: { id: payment.bookingId },
+    include: { tontine: true }
+  })
 
-  } catch (error) {
-    console.error('Confirm payment error:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
-  }
+  const newStatus = currentBooking?.tontine ? 'TONTINE' : 'PENDING'
+
+  await prisma.booking.update({
+    where: { id: payment.bookingId },
+    data: { status: newStatus }
+  })
+
+  return NextResponse.json({ success: true, message: 'Paiement rejeté.' })
+}
 }
