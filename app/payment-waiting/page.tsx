@@ -13,43 +13,43 @@ export default function PaymentWaitingPage() {
   const [rejectedNote, setRejectedNote] = useState('');
 
   useEffect(() => {
-    if (!booking.bookingId) {
-      router.push('/');
-      return;
-    }
+  if (!booking.bookingId) {
+    router.push('/');
+    return;
+  }
 
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/payment/status?bookingId=${booking.bookingId}`);
-        const data = await res.json();
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/payment/status?bookingId=${booking.bookingId}`);
+      const data = await res.json();
 
-        if (data.status === 'PAID') {
-          clearInterval(interval);
-          updateBooking({ ticketId: data.ticketCode, isPaid: true });
-          router.push('/ticket');
+      if (data.status === 'PAID') {
+        clearInterval(interval);
+        updateBooking({ ticketId: data.ticketCode, isPaid: true });
+        router.push('/ticket');
 
-        } else if (data.status === 'TONTINE' && !data.hasPendingPayment) {
-          clearInterval(interval);
-          updateBooking({
-            tontinePaid: data.totalPaid,
-            remainingAmount: data.remaining,
-            amountToPayNow: 0,
-            isTontine: true,
-          });
-          router.push('/tontine');
+      } else if (data.status === 'TONTINE' && !data.hasPendingPayment) {
+        clearInterval(interval);
+        updateBooking({
+          tontinePaid: data.totalPaid,
+          remainingAmount: data.remaining,
+          amountToPayNow: 0,
+          isTontine: true,
+        });
+        router.push('/tontine');
 
-        } else if (data.lastPaymentStatus === 'FAILED') {
-          clearInterval(interval);
-          setRejectedNote(data.rejectedNote || '');
-          setStatus('rejected');
-        }
-      } catch (e) {
-        console.error('Polling error:', e);
+      } else if (data.lastPaymentStatus === 'FAILED') {
+        clearInterval(interval);
+        setRejectedNote(data.rejectedNote || '');
+        setStatus('rejected');
       }
-    }, 8000);
+    } catch (e) {
+      console.error('Polling error:', e);
+    }
+  }, 8000);
 
-    return () => clearInterval(interval);
-  }, [booking.bookingId]);
+  return () => clearInterval(interval);
+}, [booking.bookingId]);
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#000007]">

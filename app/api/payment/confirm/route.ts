@@ -125,6 +125,27 @@ export async function POST(req: NextRequest) {
     data: { status: 'FAILED', adminNote: adminNote || 'Paiement rejeté' }
   })
 
+  const currentBooking = await prisma.booking.findUnique({
+    where: { id: payment.bookingId },
+    include: { 
+      tontine: true,
+      payments: { where: { status: 'SUCCESS' } }
+    }
+  })
+
+  // Si tontine avec versements déjà validés → garder TONTINE
+  // Si premier paiement rejeté → repasser PENDING
+  const hasSuccessPayments = (currentBooking?.payments?.length || 0) > 0
+  const newStatus = hasSuccessPayments ? 'TONTINE' : 'PENDING'
+
+  await prisma.booking.update({
+    where: { id: payment.bookingId },
+    data: { status: newStatus }
+  })
+
+  return NextResponse.json({ success: true, message: 'Paiement rejeté.' })
+}
+
   // Garder le statut TONTINE si c'était une tontine, sinon PENDING
   const currentBooking = await prisma.booking.findUnique({
     where: { id: payment.bookingId },

@@ -22,16 +22,21 @@ export async function GET() {
     })
 
     // Enrichir avec le total déjà payé
-    const enriched = pendingPayments.map(payment => {
-      const totalPaid = payment.booking.payments.reduce((sum, p) => sum + p.amount, 0)
-      const isTontine = payment.amount < payment.booking.totalAmount || payment.booking.status === 'TONTINE'
-      return {
-        ...payment,
-        totalPaid,
-        isTontine,
-        remaining: payment.booking.totalAmount - totalPaid - payment.amount,
-      }
-    })
+  const enriched = pendingPayments.map(payment => {
+  const totalPaid = payment.booking.payments.reduce(
+    (sum: number, p: any) => sum + p.amount, 0
+  )
+  // Utiliser tontine.amountPaid si disponible, sinon calculer
+  const realPaid = payment.booking.tontine?.amountPaid || totalPaid
+  const isTontine = payment.amount < payment.booking.totalAmount || 
+                    payment.booking.status === 'TONTINE'
+  return {
+    ...payment,
+    totalPaid: realPaid,
+    isTontine,
+    remaining: payment.booking.totalAmount - realPaid - payment.amount,
+  }
+})
 
     return NextResponse.json({
       success: true,

@@ -37,19 +37,20 @@ export async function GET() {
         }
       }),
       // Bookings tontine en cours avec progression
-      prisma.booking.findMany({
-        where: { status: 'TONTINE' },
-        include: {
-          user: true,
-          koreanIdentity: true,
-          tontine: true,
-          payments: {
-            where: { status: 'SUCCESS' },
-            orderBy: { createdAt: 'desc' }
-          }
-        },
-        orderBy: { createdAt: 'desc' }
-      })
+    // Bookings tontine en cours avec progression
+prisma.booking.findMany({
+  where: { status: 'TONTINE' },
+  include: {
+    user: true,
+    koreanIdentity: true,
+    tontine: true,
+    payments: {
+      where: { status: 'SUCCESS' }, // ← seulement les validés
+      orderBy: { createdAt: 'desc' }
+    }
+  },
+  orderBy: { createdAt: 'desc' }
+})
     ])
 
     return NextResponse.json({
