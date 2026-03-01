@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -25,13 +26,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ status: 'NOT_FOUND' })
     }
 
-    // Calculer total payé
     const totalPaid = booking.payments
       .filter(p => p.status === 'SUCCESS')
-      .reduce((sum, p) => sum + p.amount, 0)
+      .reduce((sum: number, p: any) => sum + p.amount, 0)
 
-    // Paiement en attente le plus récent
     const pendingPayment = booking.payments.find(p => p.status === 'PENDING')
+    const lastPayment = booking.payments[0]
 
     return NextResponse.json({
       status: booking.status,
@@ -40,6 +40,8 @@ export async function GET(req: NextRequest) {
       totalAmount: booking.totalAmount,
       remaining: booking.totalAmount - totalPaid,
       hasPendingPayment: !!pendingPayment,
+      lastPaymentStatus: lastPayment?.status || null,
+      rejectedNote: lastPayment?.status === 'FAILED' ? lastPayment.adminNote : null,
       tontine: booking.tontine,
     })
 
