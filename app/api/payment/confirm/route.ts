@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
+
 async function generateTicket(bookingId: string) {
   const ticketCode = `SAH-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
   const booking = await prisma.booking.findUnique({
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId },
-      include: { 
+      include: {
         booking: {
           include: { tontine: true }
         }
@@ -47,34 +48,29 @@ export async function POST(req: NextRequest) {
       const isTontineBooking = booking.status === 'TONTINE' || payment.amount < booking.totalAmount
 
       if (isTontineBooking) {
-        // Calculer le total déjà payé
         const allSuccessPayments = await prisma.payment.findMany({
-          where: { 
-            bookingId: booking.id,
-            status: 'SUCCESS'
-          }
+          where: { bookingId: booking.id, status: 'SUCCESS' }
         })
         const totalPaid = allSuccessPayments.reduce((sum: number, p: any) => sum + p.amount, 0)
         const isComplete = totalPaid >= booking.totalAmount
 
-        // Upsert tontine
         await prisma.tontine.upsert({
-  where: { bookingId: booking.id },
-  update: {
-    amountPaid: totalPaid,
-    paidBoxes: Math.floor(totalPaid / 1000),
-    remainingAmount: booking.totalAmount - totalPaid,
-    status: isComplete ? 'COMPLETE' : 'IN_PROGRESS',
-  },
-  create: {
-    bookingId: booking.id,
-    totalBoxes: Math.floor(booking.totalAmount / 1000),
-    paidBoxes: Math.floor(totalPaid / 1000),
-    amountPaid: totalPaid,
-    remainingAmount: booking.totalAmount - totalPaid,
-    status: isComplete ? 'COMPLETE' : 'IN_PROGRESS',
-  }
-})
+          where: { bookingId: booking.id },
+          update: {
+            amountPaid: totalPaid,
+            paidBoxes: Math.floor(totalPaid / 1000),
+            remainingAmount: booking.totalAmount - totalPaid,
+            status: isComplete ? 'COMPLETE' : 'IN_PROGRESS',
+          },
+          create: {
+            bookingId: booking.id,
+            totalBoxes: Math.floor(booking.totalAmount / 1000),
+            paidBoxes: Math.floor(totalPaid / 1000),
+            amountPaid: totalPaid,
+            remainingAmount: booking.totalAmount - totalPaid,
+            status: isComplete ? 'COMPLETE' : 'IN_PROGRESS',
+          }
+        })
 
         if (isComplete) {
           await prisma.booking.update({
@@ -104,7 +100,6 @@ export async function POST(req: NextRequest) {
         }
 
       } else {
-        // Paiement complet en une fois
         await prisma.booking.update({
           where: { id: booking.id },
           data: { status: 'PAID' }
@@ -119,46 +114,36 @@ export async function POST(req: NextRequest) {
         })
       }
 
-    }  else if (action === 'reject') {
-  await prisma.payment.update({
-    where: { id: paymentId },
-    data: { status: 'FAILED', adminNote: adminNote || 'Paiement rejeté' }
-  })
+    } else if (action === 'reject') {
+      await prisma.payment.update({
+        where: { id: paymentId },
+        data: { status: 'FAILED', adminNote: adminNote || 'Paiement rejeté' }
+      })
 
-  const currentBooking = await prisma.booking.findUnique({
-    where: { id: payment.bookingId },
-    include: { 
-      tontine: true,
-      payments: { where: { status: 'SUCCESS' } }
+      const currentBooking = await prisma.booking.findUnique({
+        where: { id: payment.bookingId },
+        include: {
+          tontine: true,
+          payments: { where: { status: 'SUCCESS' } }
+        }
+      })
+
+      const hasSuccessPayments = (currentBooking?.payments?.length || 0) > 0
+      const newStatus = hasSuccessPayments ? 'TONTINE' : 'PENDING'
+
+      await prisma.booking.update({
+        where: { id: payment.bookingId },
+        data: { status: newStatus }
+      })
+
+      return NextResponse.json({ success: true, message: 'Paiement rejeté.' })
+
+    } else {
+      return NextResponse.json({ error: 'Action invalide' }, { status: 400 })
     }
-  })
 
-  // Si tontine avec versements déjà validés → garder TONTINE
-  // Si premier paiement rejeté → repasser PENDING
-  const hasSuccessPayments = (currentBooking?.payments?.length || 0) > 0
-  const newStatus = hasSuccessPayments ? 'TONTINE' : 'PENDING'
-
-  await prisma.booking.update({
-    where: { id: payment.bookingId },
-    data: { status: newStatus }
-  })
-
-  return NextResponse.json({ success: true, message: 'Paiement rejeté.' })
-}
-
-  // Garder le statut TONTINE si c'était une tontine, sinon PENDING
-  const currentBooking = await prisma.booking.findUnique({
-    where: { id: payment.bookingId },
-    include: { tontine: true }
-  })
-
-  const newStatus = currentBooking?.tontine ? 'TONTINE' : 'PENDING'
-
-  await prisma.booking.update({
-    where: { id: payment.bookingId },
-    data: { status: newStatus }
-  })
-
-  return NextResponse.json({ success: true, message: 'Paiement rejeté.' })
-}
+  } catch (error) {
+    console.error('Confirm payment error:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
 }

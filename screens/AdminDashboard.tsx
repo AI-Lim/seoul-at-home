@@ -51,7 +51,7 @@ export function AdminDashboard() {
 
   useEffect(() => {
     fetchAll();
-    const interval = setInterval(fetchPending, 15000);
+    const interval = setInterval(fetchPending, 30000);
     return () => clearInterval(interval);
   }, []);
 
